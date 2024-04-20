@@ -1,0 +1,110 @@
+{
+  "name": "@stone-js/aws-lambda-adapter",
+  "version": "0.0.0",
+  "description": "Stone.js AWS Lambda Adapters",
+  "author": "Mr. Stone <evensstone@gmail.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/stone-js/aws-lambda-adapter.git"
+  },
+  "homepage": "https://github.com/stone-js/aws-lambda-adapter#readme",
+  "bugs": {
+    "url": "https://github.com/stone-js/aws-lambda-adapter/issues"
+  },
+  "keywords": [
+    "aws",
+    "faas",
+    "node",
+    "http",
+    "bridge",
+    "lambda",
+    "driver",
+    "runner",
+    "adapter",
+    "Stone.js",
+    "connector",
+    "middleware",
+    "serverless"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "lint": "ts-standard src",
+    "lint:fix": "ts-standard --fix src tests",
+    "predoc": "rimraf docs",
+    "doc": "typedoc",
+    "prebuild": "rimraf dist && npm run doc",
+    "build": "rollup -c",
+    "test": "vitest run",
+    "test:cvg": "npm run test -- --coverage",
+    "test:text": "npm run test:cvg -- --coverage.reporter=text",
+    "test:html": "npm run test:cvg -- --coverage.reporter=html",
+    "test:clover": "npm run test:cvg -- --coverage.reporter=clover",
+    "prepare": "husky"
+  },
+  "peerDependencies": {
+    "@stone-js/core": "^0.0.35",
+    "@stone-js/http-core": "^0.0.33",
+    "@stone-js/pipeline": "^0.0.46",
+    "@stone-js/service-container": "^0.0.43"
+  },
+  "dependencies": {
+    "accepts": "^1.3.8",
+    "bytes": "^3.1.2",
+    "content-type": "^1.0.5",
+    "mime": "^4.0.4",
+    "proxy-addr": "^2.0.7",
+    "statuses": "^2.0.1",
+    "type-is": "^1.6.18"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-multi-entry": "^6.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "@types/accepts": "^1.3.7",
+    "@types/bytes": "^3.1.4",
+    "@types/content-type": "^1.1.8",
+    "@types/mime": "^3.0.4",
+    "@types/node": "^22.9.0",
+    "@types/proxy-addr": "^2.0.3",
+    "@types/statuses": "^2.0.5",
+    "@types/type-is": "^1.6.6",
+    "@vitest/coverage-v8": "^2.1.4",
+    "husky": "^9.1.6",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.1.5",
+    "rollup-plugin-delete": "^2.1.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-node-externals": "^6.1.2",
+    "ts-standard": "^12.0.2",
+    "tslib": "^2.8.1",
+    "typedoc": "^0.27.0",
+    "typedoc-plugin-markdown": "^4.2.10",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "ts-standard": {
+    "globals": [
+      "it",
+      "expect",
+      "describe",
+      "beforeEach"
+    ]
+  }
+}
