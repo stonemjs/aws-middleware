@@ -23,6 +23,7 @@ import { awsAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
  *
  * @typedef  {Object} adapterOptions
  * @property {string} alias
+ * @property {boolean} default
  * @property {Object} middleware
  * @property {(Middlewareable[]|string[])} middleware.input
  * @property {(Middlewareable[]|string[])} middleware.output
@@ -46,6 +47,7 @@ export const AwsLambda = (options = {}) => {
         deepmerge(awsAdapterOptions.adapters[0], {
           app: {
             adapter: {
+              default: options.default ?? false,
               alias: options.alias ?? AWS_LAMBDA_PLATFORM
             },
             mapper: {

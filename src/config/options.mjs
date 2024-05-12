@@ -7,7 +7,7 @@ import {
 } from '@stonejs-community/aws-lambda-adapter'
 
 /**
- * Console options.
+ * Aws adapter options.
  *
  * @returns {Object}
 */

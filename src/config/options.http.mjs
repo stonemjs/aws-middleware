@@ -13,7 +13,7 @@ import {
 } from '@stonejs-community/aws-lambda-adapter'
 
 /**
- * Console options.
+ * Aws http adapter options.
  *
  * @returns {Object}
 */

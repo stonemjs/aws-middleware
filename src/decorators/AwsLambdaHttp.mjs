@@ -21,6 +21,7 @@ export const AwsLambdaHttp = (options = {}) => {
         deepmerge(awsHttpAdapterOptions.adapters[0], {
           app: {
             adapter: {
+              default: options.default ?? false,
               alias: options.alias ?? AWS_LAMBDA_PLATFORM
             },
             mapper: {
