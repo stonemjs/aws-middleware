@@ -1,6 +1,6 @@
 import deepmerge from 'deepmerge'
 import { classLevelDecoratorChecker } from '@stone-js/common'
-import { AWS_LAMBDA_PLATFORM } from '@stonejs-community/aws-lambda-adapter'
+import { AWS_LAMBDA_HTTP_PLATFORM } from '@stonejs-community/aws-lambda-adapter'
 import { awsHttpAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
 
 /**
@@ -22,7 +22,7 @@ export const AwsLambdaHttp = (options = {}) => {
           app: {
             adapter: {
               default: options.default ?? false,
-              alias: options.alias ?? AWS_LAMBDA_PLATFORM
+              alias: options.alias ?? AWS_LAMBDA_HTTP_PLATFORM
             },
             mapper: {
               input: {
