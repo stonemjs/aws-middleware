@@ -1,13 +1,13 @@
 {
-  "name": "@stone-js/aws-middleware",
+  "name": "@stonejs-community/aws-lambda-adapter",
   "version": "0.0.1",
-  "description": "Stone.js AWS middleware",
+  "description": "Stone.js AWS Adapters",
   "author": "Mr. Stone <evensstone@gmail.com>",
   "license": "MIT",
-  "repository": "git@github.com:stonemjs/aws-middleware.git",
-  "homepage": "https://github.com/stonemjs/aws-middleware#readme",
+  "repository": "git@github.com:stonejs-community/aws-lambda-adapter.git",
+  "homepage": "https://github.com/stonejs-community/aws-lambda-adapter#readme",
   "bugs": {
-    "url": "https://github.com/stonemjs/aws-middleware/issues"
+    "url": "https://github.com/stonejs-community/aws-lambda-adapter/issues"
   },
   "keywords": [
     "aws",
@@ -24,17 +24,17 @@
   ],
   "type": "module",
   "exports": {
-    "./adapter/http/input": {
-      "types": "./dist/types/http_input_adapter_middleware.d.ts",
-      "default": "./dist/http_input_adapter_middleware.js"
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
     },
-    "./adapter/http/output": {
-      "types": "./dist/types/http_output_adapter_middleware.d.ts",
-      "default": "./dist/http_output_adapter_middleware.js"
+    "./config": {
+      "types": "./dist/types/config.d.ts",
+      "default": "./dist/config.js"
     },
-    "./adapter/event/output": {
-      "types": "./dist/types/event_output_adapter_middleware.d.ts",
-      "default": "./dist/event_output_adapter_middleware.js"
+    "./decorators": {
+      "types": "./dist/types/decorators.d.ts",
+      "default": "./dist/decorators.js"
     }
   },
   "engines": {
@@ -52,7 +52,7 @@
     "build": "npm run lint && rollup -c && npm run types",
     "release": "npm run test:text && npm run build && npm publish --access public",
     "local_publish": "npm run build && npm publish --registry http://localhost:4873/",
-    "local_unpublish": "npm unpublish @stone-js/aws-middleware -f --registry http://localhost:4873",
+    "local_unpublish": "npm unpublish @stonejs-community/aws-lambda-adapter -f --registry http://localhost:4873",
     "test": "npm run lint:test && jest",
     "test:cvg": "npm run lint:test && jest --coverage",
     "test:text": "npm run test:cvg -- --coverageReporters=text",
@@ -62,13 +62,16 @@
   "peerDependencies": {
     "@stone-js/http": "^0.0.1",
     "@stone-js/common": "^0.0.1",
-    "@stone-js/middleware": "^0.0.1"
+    "@stone-js/adapters": "^0.0.1"
   },
   "dependencies": {
     "bytes": "^3.1.2",
     "content-type": "^1.0.5",
     "proxy-addr": "^2.0.7",
     "send": "^0.18.0",
+    "accepts": "^1.3.8",
+    "deepmerge": "^4.3.1",
+    "mime": "^3.0.0",
     "statuses": "^2.0.1",
     "type-is": "^1.6.18"
   },

@@ -1,9 +1,9 @@
 {
   // https://www.typescriptlang.org/docs/handbook/declaration-files/dts-from-js.html
   "include": [
-    "dist/http_input_adapter_middleware.js",
-    "dist/http_output_adapter_middleware.js",
-    "dist/event_output_adapter_middleware.js"
+    "dist/index.js",
+    "dist/config.js",
+    "dist/decorators.js"
   ],
   "compilerOptions": {
     "skipLibCheck": true,

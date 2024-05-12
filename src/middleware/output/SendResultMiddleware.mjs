@@ -9,11 +9,11 @@
  */
 
 /**
- * Class representing a SendMiddleware.
+ * Class representing a SendResultMiddleware.
  *
  * @author Mr. Stone <evensstone@gmail.com>
  */
-export class SendMiddleware {
+export class SendResultMiddleware {
   /**
    * Handle event result and transform it to platform-specific response.
    *

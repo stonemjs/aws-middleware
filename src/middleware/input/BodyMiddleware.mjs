@@ -2,7 +2,7 @@ import bytes from 'bytes'
 import typeIs from 'type-is'
 import { Buffer } from 'safe-buffer'
 import { HttpError } from '@stone-js/common'
-import { isMultipart, getType, getCharset } from '@stone-js/middleware/utils'
+import { isMultipart, getType, getCharset } from '@stone-js/adapters/utils'
 
 /**
  * Input data to transform via middleware.

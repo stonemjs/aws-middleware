@@ -1,17 +1,17 @@
-# Stone.js: AWS Middleware
+# Stone.js: AWS lambda adapter
 
-![npm](https://img.shields.io/npm/l/@stone-js/aws-middleware)
-![npm](https://img.shields.io/npm/v/@stone-js/aws-middleware)
-![npm](https://img.shields.io/npm/dm/@stone-js/aws-middleware)
+![npm](https://img.shields.io/npm/l/@stonejs-community/aws-lambda-adapter)
+![npm](https://img.shields.io/npm/v/@stonejs-community/aws-lambda-adapter)
+![npm](https://img.shields.io/npm/dm/@stonejs-community/aws-lambda-adapter)
 ![Maintenance](https://img.shields.io/maintenance/yes/2024)
 
-Stone.js AWS Middleware with typings.
+Stone.js AWS Lambda adapter with typings.
 
 ---
 
-Get started with the [documentation](https://stonejs.com/cookbook/aws-middleware).
+Get started with the [documentation](https://stonejs.com/cookbook/aws-lambda-adapter).
 
 
 ## Contributing
 
-See [Contributing Guide](https://github.com/stonemjs/aws-middleware/blob/main/CONTRIBUTING.md).
+See [Contributing Guide](https://github.com/stonejs-community/aws-lambda-adapter/blob/main/CONTRIBUTING.md).

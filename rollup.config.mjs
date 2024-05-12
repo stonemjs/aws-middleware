@@ -5,9 +5,13 @@ import nodeResolve from '@rollup/plugin-node-resolve'
 import nodeExternals from 'rollup-plugin-node-externals'
 
 const inputs = {
-  http_input_adapter_middleware: 'src/adapter/http/input/*.mjs',
-  http_output_adapter_middleware: 'src/adapter/http/output/*.mjs',
-  event_output_adapter_middleware: 'src/adapter/event/output/*.mjs',
+  config: 'src/config/*.mjs',
+  decorators: 'src/decorators/*.mjs',
+  index: [
+    'src/AWSLambdaAdapter.mjs',
+    'src/middleware/**/*.mjs',
+    'src/constants.mjs'
+  ],
 }
 
 export default Object.entries(inputs).map(([name, input]) => ({
@@ -17,7 +21,9 @@ export default Object.entries(inputs).map(([name, input]) => ({
   ],
   plugins: [
     multi(),
-    nodeExternals(), // Must always be before `nodeResolve()`.
+    nodeExternals({
+      include: ['@stonejs-community/aws-lambda-adapter']
+    }), // Must always be before `nodeResolve()`.
     nodeResolve({
       exportConditions: ['node', 'import', 'require', 'default']
     }),
