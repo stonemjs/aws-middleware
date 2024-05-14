@@ -1,5 +1,4 @@
-import deepmerge from 'deepmerge'
-import { classLevelDecoratorChecker } from '@stone-js/common'
+import { classLevelDecoratorChecker, merge } from '@stone-js/common'
 import { AWS_LAMBDA_HTTP_PLATFORM } from '@stonejs-community/aws-lambda-adapter'
 import { awsHttpAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
 
@@ -18,7 +17,7 @@ export const AwsLambdaHttp = (options = {}) => {
 
     const metadata = {
       adapters: [
-        deepmerge(awsHttpAdapterOptions.adapters[0], {
+        merge(awsHttpAdapterOptions.adapters[0], {
           app: {
             adapter: {
               default: options.default ?? false,
@@ -37,7 +36,7 @@ export const AwsLambdaHttp = (options = {}) => {
       ]
     }
 
-    target.$$metadata$$ = deepmerge(target.$$metadata$$ ?? {}, metadata)
+    target.$$metadata$$ = merge(target.$$metadata$$ ?? {}, metadata)
 
     return target
   }
