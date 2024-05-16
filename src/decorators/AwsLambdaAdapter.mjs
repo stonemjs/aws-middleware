@@ -10,7 +10,7 @@ import { awsAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
  */
 
 /**
- * Decorators, usefull for decorating classes.
+ * Decorators, Useful for decorating classes.
  *
  * @author Mr. Stone <evensstone@gmail.com>
  *
