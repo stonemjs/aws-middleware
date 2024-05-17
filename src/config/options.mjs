@@ -60,7 +60,9 @@ export const awsAdapterOptions = {
 
           // Output mapper middleware. Can be class constructor or alias.
           // Middleware must be registered before using it in the app middleware array.
-          middleware: [SendResultMiddleware]
+          middleware: [
+            { pipe: SendResultMiddleware, priority: 0 }
+          ]
         }
       }
     }

@@ -51,7 +51,13 @@ export const awsHttpAdapterOptions = {
 
           // Input mapper middleware. Can be class constructor or alias.
           // Middleware must be registered before using it in the app middleware array.
-          middleware: [BodyMiddleware, CommonMiddleware, FilesMiddleware, HostMiddleware, IpMiddleware]
+          middleware: [
+            { pipe: IpMiddleware, priority: 0 },
+            { pipe: CommonMiddleware, priority: 0.1 },
+            { pipe: HostMiddleware, priority: 0.2 },
+            { pipe: BodyMiddleware, priority: 0.3 },
+            { pipe: FilesMiddleware, priority: 0.4 }
+          ]
         },
 
         // Output mapper options
@@ -66,7 +72,10 @@ export const awsHttpAdapterOptions = {
 
           // Output mapper middleware. Can be class constructor or alias.
           // Middleware must be registered before using it in the app middleware array.
-          middleware: [SendFileMiddleware, SendMiddleware]
+          middleware: [
+            { pipe: SendMiddleware, priority: 0 },
+            { pipe: SendFileMiddleware, priority: 0.1 }
+          ]
         }
       }
     }
