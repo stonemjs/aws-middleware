@@ -8,7 +8,7 @@ import { awsHttpAdapterOptions } from '@stonejs-community/aws-lambda-adapter/con
  * @author Mr. Stone <evensstone@gmail.com>
  *
  * @memberOf Decorators
- * @param  {adapterOptions} options
+ * @param  {adapterOptions} [options]
  * @return {Function}
  */
 export const AwsLambdaHttpAdapter = (options = {}) => {

@@ -21,11 +21,11 @@ import { awsAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
  * AwsLambda options.
  *
  * @typedef  {Object} adapterOptions
- * @property {string} alias
- * @property {boolean} default
- * @property {Object} middleware
- * @property {(Middlewareable[]|string[])} middleware.input
- * @property {(Middlewareable[]|string[])} middleware.output
+ * @property {string} [alias]
+ * @property {boolean} [default]
+ * @property {Object} [middleware]
+ * @property {(Middlewareable[]|string[])} [middleware.input]
+ * @property {(Middlewareable[]|string[])} [middleware.output]
  */
 
 /**
@@ -34,7 +34,7 @@ import { awsAdapterOptions } from '@stonejs-community/aws-lambda-adapter/config'
  * @author Mr. Stone <evensstone@gmail.com>
  *
  * @memberOf Decorators
- * @param  {adapterOptions} options
+ * @param  {adapterOptions} [options]
  * @return {Function}
  */
 export const AwsLambdaAdapter = (options = {}) => {
