@@ -1,7 +1,7 @@
 import mime from 'mime'
 import accepts from 'accepts'
 import statuses from 'statuses'
-import { Adapter } from '@stone-js/adapters'
+import { Adapter } from '@stone-js/core'
 import { AWS_LAMBDA_PLATFORM } from './constants.mjs'
 import { isBrowser, RuntimeError } from '@stone-js/common'
 

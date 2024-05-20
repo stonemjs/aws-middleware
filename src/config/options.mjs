@@ -1,5 +1,5 @@
-import { Mapper } from '@stone-js/adapters'
-import { IncomingEvent } from '@stone-js/common'
+import { AdapterMapper } from '@stone-js/core'
+import { IncomingEvent } from '@stone-js/event-foundation'
 import {
   AWSLambdaAdapter,
   AWS_LAMBDA_PLATFORM,
@@ -38,7 +38,7 @@ export const awsAdapterOptions = {
         input: {
 
           // Mapper class constructor.
-          type: Mapper,
+          type: AdapterMapper,
 
           // Input mapper resolve
           resolver: (passable) => IncomingEvent.create(passable.event),
@@ -53,7 +53,7 @@ export const awsAdapterOptions = {
         output: {
 
           // Mapper class constructor.
-          type: Mapper,
+          type: AdapterMapper,
 
           // Output mapper resolve
           resolver: (passable) => passable.response,

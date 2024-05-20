@@ -1,5 +1,5 @@
-import { Mapper } from '@stone-js/adapters'
-import { IncomingHttpEvent } from '@stone-js/http'
+import { AdapterMapper } from '@stone-js/core'
+import { IncomingHttpEvent } from '@stone-js/event-foundation'
 import {
   IpMiddleware,
   BodyMiddleware,
@@ -44,7 +44,7 @@ export const awsHttpAdapterOptions = {
         input: {
 
           // Mapper class constructor.
-          type: Mapper,
+          type: AdapterMapper,
 
           // Input mapper resolve
           resolver: (passable) => IncomingHttpEvent.create(passable.event),
@@ -65,7 +65,7 @@ export const awsHttpAdapterOptions = {
         output: {
 
           // Mapper class constructor.
-          type: Mapper,
+          type: AdapterMapper,
 
           // Output mapper resolve
           resolver: (passable) => passable.response,
