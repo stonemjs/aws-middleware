@@ -1,5 +1,5 @@
 import statuses from 'statuses'
-import { BinaryFileResponse } from '@stone-js/event-foundation'
+import { BinaryFileResponse } from '@stone-js/http-core'
 
 /**
  * Input data to transform via middleware.

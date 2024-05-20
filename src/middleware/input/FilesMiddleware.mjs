@@ -1,4 +1,4 @@
-import { isMultipart, getFilesFromMessage } from '@stone-js/event-foundation/utils'
+import { isMultipart, getFilesFromMessage } from '@stone-js/http-core/utils'
 
 /**
  * Class representing a FilesMiddleware.

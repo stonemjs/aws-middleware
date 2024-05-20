@@ -1,5 +1,5 @@
 import proxyAddr from 'proxy-addr'
-import { isIpTrusted } from '@stone-js/event-foundation/utils'
+import { isIpTrusted } from '@stone-js/http-core/utils'
 
 /**
  * Class representing an IpMiddleware.

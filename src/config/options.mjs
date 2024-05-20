@@ -1,5 +1,4 @@
-import { AdapterMapper } from '@stone-js/core'
-import { IncomingEvent } from '@stone-js/event-foundation'
+import { IncomingEvent, AdapterMapper } from '@stone-js/core'
 import {
   AWSLambdaAdapter,
   AWS_LAMBDA_PLATFORM,

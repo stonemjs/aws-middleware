@@ -1,8 +1,8 @@
 import bytes from 'bytes'
 import typeIs from 'type-is'
 import { Buffer } from 'safe-buffer'
-import { HttpError } from '@stone-js/event-foundation'
-import { isMultipart, getType, getCharset } from '@stone-js/event-foundation/utils'
+import { HttpError } from '@stone-js/http-core'
+import { isMultipart, getType, getCharset } from '@stone-js/http-core/utils'
 
 /**
  * Input data to transform via middleware.

@@ -1,5 +1,5 @@
 import { URL } from 'node:url'
-import { getHostname, getProtocol } from '@stone-js/event-foundation/utils'
+import { getHostname, getProtocol } from '@stone-js/http-core/utils'
 
 /**
  * Class representing an HostMiddleware.
