@@ -1,21 +1,89 @@
 import { IncomingHttpEvent, IncomingHttpEventOptions, OutgoingHttpResponse } from '@stone-js/http-core'
 import { AdapterContext, IncomingEvent, IncomingEventOptions, OutgoingResponse, RawResponseOptions } from '@stone-js/core'
 
+/**
+ * Represents a generic raw response as a key-value pair.
+ */
 export type RawResponse = Record<string, unknown>
-export type RawHttpResponse = RawHttpResponseOptions
-export type AwsLambdaEvent = Record<string, unknown>
-export type AwsLambdaContext = Record<string, unknown>
-export type AwsLambdaEventHandlerFunction<RawResponseType = RawResponse> = (rawEvent: AwsLambdaEvent, context: AwsLambdaContext) => Promise<RawResponseType>
 
+/**
+ * Represents a raw HTTP response, extending from `RawHttpResponseOptions`.
+ */
+export type RawHttpResponse = RawHttpResponseOptions
+
+/**
+ * Represents a generic AWS Lambda event as a key-value pair.
+ */
+export type AwsLambdaEvent = Record<string, unknown>
+
+/**
+ * Represents the AWS Lambda execution context as a key-value pair.
+ */
+export type AwsLambdaContext = Record<string, unknown>
+
+/**
+ * Represents an AWS Lambda event handler function.
+ *
+ * @template RawResponseType - The type of the response returned by the handler.
+ * @param rawEvent - The raw event received by the AWS Lambda function.
+ * @param context - The AWS Lambda execution context.
+ * @returns A promise resolving to the response of type `RawResponseType`.
+ */
+export type AwsLambdaEventHandlerFunction<RawResponseType = RawResponse> = (
+  rawEvent: AwsLambdaEvent,
+  context: AwsLambdaContext
+) => Promise<RawResponseType>
+
+/**
+ * Represents the structure of an AWS Lambda HTTP event.
+ *
+ * This interface defines the standard properties of an HTTP event in AWS Lambda,
+ * including headers, query parameters, the request context, and other metadata.
+ */
 export interface AwsLambdaHttpEvent extends Record<string, unknown> {
+  /**
+   * The path of the HTTP request.
+   */
   path?: string
+
+  /**
+   * The body of the HTTP request.
+   */
   body?: unknown
+
+  /**
+   * The encoding format of the body, such as `base64`.
+   */
   encoding?: string
+
+  /**
+   * The raw path of the HTTP request, as sent by the client.
+   */
   rawPath?: string
+
+  /**
+   * Indicates whether the request body is base64-encoded.
+   */
   isBase64Encoded?: boolean
+
+  /**
+   * The headers of the HTTP request as key-value pairs.
+   */
   headers: Record<string, string>
+
+  /**
+   * The HTTP method of the request (e.g., `GET`, `POST`).
+   */
   httpMethod?: string
+
+  /**
+   * The query string parameters included in the request.
+   */
   queryStringParameters?: Record<string, string>
+
+  /**
+   * The context of the request, including identity and HTTP metadata.
+   */
   requestContext?: {
     identity?: {
       sourceIp?: string
@@ -28,6 +96,12 @@ export interface AwsLambdaHttpEvent extends Record<string, unknown> {
   }
 }
 
+/**
+ * Represents the context for the AWS Lambda HTTP Adapter.
+ *
+ * This interface extends `AdapterContext` and includes additional properties specific
+ * to HTTP events in AWS Lambda.
+ */
 export interface AwsLambdaHttpAdapterContext extends AdapterContext<
 AwsLambdaHttpEvent,
 RawHttpResponse,
@@ -37,11 +111,17 @@ IncomingHttpEventOptions,
 OutgoingHttpResponse
 > {
   /**
-   * The raw HTTP response object associated with the current request.
+   * The raw HTTP response associated with the current context.
    */
   rawResponse: RawHttpResponse
 }
 
+/**
+ * Represents the context for the AWS Lambda Adapter.
+ *
+ * This interface extends `AdapterContext` and includes additional properties
+ * specific to generic AWS Lambda events.
+ */
 export interface AwsLambdaAdapterContext extends AdapterContext<
 AwsLambdaEvent,
 RawResponse,
@@ -51,7 +131,7 @@ IncomingEventOptions,
 OutgoingResponse
 > {
   /**
-   * The raw HTTP response object associated with the current request.
+   * The raw response associated with the current context.
    */
   rawResponse: RawResponse
 }
@@ -80,7 +160,7 @@ export interface RawHttpResponseOptions extends RawResponseOptions {
 
   /**
    * Headers to include in the HTTP response.
-   * Can be provided as a `Map<string, string>` or `Headers` object.
+   * Can be provided as key-value pairs.
    */
   headers?: Record<string, string>
 }

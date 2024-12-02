@@ -9,9 +9,9 @@ import {
   getHostname,
   isIpTrusted
 } from '@stone-js/http-core'
-import { AwsLambdaHttpEvent, AwsLambdaHttpAdapterContext } from '../declarations'
 import { RawHttpResponseWrapper } from '../RawHttpResponseWrapper'
 import { AwsLambdaAdapterError } from '../errors/AwsLambdaAdapterError'
+import { AwsLambdaHttpEvent, AwsLambdaHttpAdapterContext } from '../declarations'
 
 /**
  * Represents the options for the IncomingEventMiddleware.
@@ -42,6 +42,9 @@ interface HttpCommonCookieOptions {
  * headers, cookies, and more, and forwards them to the next middleware in the pipeline.
  */
 export class IncomingEventMiddleware {
+  /**
+   * The blueprint for resolving configuration and dependencies.
+   */
   private readonly blueprint: IBlueprint
 
   /**
@@ -59,7 +62,7 @@ export class IncomingEventMiddleware {
    * @param context - The adapter context containing the raw event, execution context, and other data.
    * @param next - The next middleware to be invoked in the pipeline.
    * @returns A promise that resolves to the processed context.
-   * @throws {NodeHttpAdapterError} If required components are missing in the context.
+   * @throws {AwsLambdaAdapterError} If required components are missing in the context.
    */
   async handle (context: AwsLambdaHttpAdapterContext, next: NextPipe<AwsLambdaHttpAdapterContext, RawHttpResponseWrapper>): Promise<RawHttpResponseWrapper> {
     if ((context.rawEvent == null) || ((context.incomingEventBuilder?.add) == null)) {
@@ -86,6 +89,12 @@ export class IncomingEventMiddleware {
     return await next(context)
   }
 
+  /**
+   * Extracts the HTTP method from the incoming rawEvent.
+   *
+   * @param rawEvent - The incoming rawEvent.
+   * @returns The HTTP method string.
+   */
   private getMethod (rawEvent: AwsLambdaHttpEvent): string {
     return rawEvent.httpMethod ??
       rawEvent.requestContext?.httpMethod ??
@@ -148,10 +157,16 @@ export class IncomingEventMiddleware {
     return proxyAddr.all(this.toNodeMessage(rawEvent), isTrusted).slice(1).reverse()
   }
 
+  /**
+   * Converts the incoming rawEvent to a Node.js IncomingMessage.
+   *
+   * @param rawEvent - The incoming rawEvent.
+   * @returns The converted IncomingMessage.
+   */
   private toNodeMessage (rawEvent: AwsLambdaHttpEvent): IncomingMessage {
     return {
       connection: { remoteAddress: this.getRemoteAddress(rawEvent) },
-      headers: { 'x-forwarded-for': rawEvent.headers['x-forwarded-for'] ?? rawEvent.headers['X-Forwarded-For'] },
+      headers: { 'x-forwarded-for': rawEvent.headers['x-forwarded-for'] ?? rawEvent.headers['X-Forwarded-For'] }
     } as unknown as IncomingMessage
   }
 

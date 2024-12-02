@@ -33,7 +33,7 @@ export class FilesEventMiddleware {
    * @param next - The next middleware to be invoked in the pipeline.
    * @returns A promise that resolves to the destination type after processing.
    *
-   * @throws {IntegrationError} If required components such as the rawEvent or IncomingEventBuilder are not provided.
+   * @throws {AwsLambdaAdapterError} If required components such as the rawEvent or IncomingEventBuilder are not provided.
    */
   async handle (context: AwsLambdaHttpAdapterContext, next: NextPipe<AwsLambdaHttpAdapterContext, RawHttpResponseWrapper>): Promise<RawHttpResponseWrapper> {
     if (context.rawEvent === undefined || context.incomingEventBuilder?.add === undefined) {
@@ -53,7 +53,13 @@ export class FilesEventMiddleware {
     return await next(context)
   }
 
-  normalizeEvent (rawEvent: AwsLambdaHttpEvent): { headers: IncomingHttpHeaders, body: unknown } {
+  /**
+   * Normalize the incoming event to an IncomingMessage.
+   *
+   * @param rawEvent - The raw event to be normalized.
+   * @returns The normalized event.
+   */
+  private normalizeEvent (rawEvent: AwsLambdaHttpEvent): { headers: IncomingHttpHeaders, body: unknown } {
     return {
       body: rawEvent.body,
       headers: {

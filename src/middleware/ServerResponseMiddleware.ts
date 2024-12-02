@@ -1,9 +1,9 @@
 import statuses from 'statuses'
 import { IBlueprint } from '@stone-js/core'
 import { NextPipe } from '@stone-js/pipeline'
+import { BinaryFileResponse } from '@stone-js/http-core'
 import { AwsLambdaHttpAdapterContext } from '../declarations'
 import { RawHttpResponseWrapper } from '../RawHttpResponseWrapper'
-import { BinaryFileResponse, streamFile } from '@stone-js/http-core'
 import { AwsLambdaAdapterError } from '../errors/AwsLambdaAdapterError'
 
 /**
@@ -33,7 +33,7 @@ export class ServerResponseMiddleware {
    * @param context - The adapter context containing the raw event, execution context, and other data.
    * @param next - The next middleware to be invoked in the pipeline.
    * @returns A promise resolving to the processed context.
-   * @throws {NodeHttpAdapterError} If required components are missing in the context.
+   * @throws {AwsLambdaAdapterError} If required components are missing in the context.
    */
   async handle (context: AwsLambdaHttpAdapterContext, next: NextPipe<AwsLambdaHttpAdapterContext, RawHttpResponseWrapper>): Promise<RawHttpResponseWrapper> {
     if (context.rawEvent === undefined || context.incomingEvent === undefined || context.outgoingResponse === undefined || context.rawResponseBuilder?.add === undefined) {

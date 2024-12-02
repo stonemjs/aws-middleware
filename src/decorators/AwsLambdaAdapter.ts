@@ -2,33 +2,32 @@ import { addBlueprint, ClassType } from '@stone-js/core'
 import { awsLambaAdapterBlueprint, AwsLambaAdapterConfig } from '../options/AwsLambdaAdapterBlueprint'
 
 /**
- * Interface for configuring the `AwsLambdaAdapter` decorator.
- *
- * This interface extends `AwsLambdaAdapterConfig` and allows partial customization
- * of the Aws Lambda adapter blueprint configuration.
+ * Configuration options for the `AwsLambdaAdapter` decorator.
+ * These options extend the default AWS Lambda adapter configuration.
  */
 export interface AwsLambdaAdapterOptions extends Partial<AwsLambaAdapterConfig> {}
 
 /**
- * A class decorator for registering an Aws Lambda adapter in the Stone.js framework.
+ * A Stone.js decorator that integrates the AWS Lambda Adapter with a class.
  *
- * The decorator modifies the `awsLambaAdapterBlueprint` by merging the provided options
- * with the default configuration. It also registers the blueprint to the target class using
- * the `addBlueprint` utility.
+ * This decorator modifies the class to seamlessly enable AWS Lambda as the
+ * execution environment for a Stone.js application. By applying this decorator,
+ * the class is automatically configured with the necessary blueprint for AWS Lambda.
  *
- * @template T - The type of the class being decorated, defaulting to `ClassType`.
+ * @template T - The type of the class being decorated. Defaults to `ClassType`.
+ * @param options - Optional configuration to customize the AWS Lambda Adapter.
  *
- * @param options - An object containing configuration options for the Aws Lambda adapter.
- *
- * @returns A class decorator function.
+ * @returns A class decorator that applies the AWS Lambda adapter configuration.
  *
  * @example
  * ```typescript
- * import { AwsLambdaAdapter } from '@stone-js/aws-lambda-http';
+ * import { AwsLambdaAdapter } from '@stone-js/aws-lambda-adapter';
  *
- * @AwsLambdaAdapter()
- * class MyService {
- *   // Service implementation
+ * @AwsLambdaAdapter({
+ *   alias: 'MyAWSLambdaAdapter',
+ * })
+ * class App {
+ *   // Your application logic here
  * }
  * ```
  */
@@ -36,13 +35,15 @@ export const AwsLambdaAdapter = <T extends ClassType = ClassType>(
   options: AwsLambdaAdapterOptions = {}
 ): ((target: T, context: ClassDecoratorContext<T>) => void) => {
   return (target: T, context: ClassDecoratorContext<T>) => {
-    // Merge the provided options with the default Aws Lambda adapter blueprint
-    awsLambaAdapterBlueprint.stone.adapters[0] = {
-      ...awsLambaAdapterBlueprint.stone.adapters[0],
-      ...options
+    if (awsLambaAdapterBlueprint.stone?.adapters?.[0] !== undefined) {
+      // Merge provided options with the default AWS Lambda adapter blueprint.
+      awsLambaAdapterBlueprint.stone.adapters[0] = {
+        ...awsLambaAdapterBlueprint.stone.adapters[0],
+        ...options
+      }
     }
 
-    // Register the updated blueprint with the target class
+    // Add the modified blueprint to the target class.
     addBlueprint(target, context, awsLambaAdapterBlueprint)
   }
 }

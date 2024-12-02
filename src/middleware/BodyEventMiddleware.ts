@@ -4,8 +4,8 @@ import { IncomingMessage } from 'node:http'
 import { IBlueprint } from '@stone-js/core'
 import { NextPipe } from '@stone-js/pipeline'
 import { RawHttpResponseWrapper } from '../RawHttpResponseWrapper'
-import { AwsLambdaAdapterError } from '../errors/AwsLambdaAdapterError'
 import { isMultipart, getCharset, getType } from '@stone-js/http-core'
+import { AwsLambdaAdapterError } from '../errors/AwsLambdaAdapterError'
 import { AwsLambdaHttpAdapterContext, AwsLambdaHttpEvent } from '../declarations'
 
 /**
@@ -46,7 +46,7 @@ export class BodyEventMiddleware {
    * @param next - The next middleware to be invoked in the pipeline.
    * @returns A promise that resolves to the destination type after processing.
    *
-   * @throws {IntegrationError} If required components such as the rawEvent or IncomingEventBuilder are not provided.
+   * @throws {AwsLambdaAdapterError} If required components such as the rawEvent or IncomingEventBuilder are not provided.
    */
   async handle (context: AwsLambdaHttpAdapterContext, next: NextPipe<AwsLambdaHttpAdapterContext, RawHttpResponseWrapper>): Promise<RawHttpResponseWrapper> {
     if (context.rawEvent === undefined || context.incomingEventBuilder?.add === undefined) {
@@ -75,7 +75,7 @@ export class BodyEventMiddleware {
    *
    * @param message - The incoming HTTP message.
    * @returns A Promise resolving to the parsed body.
-   * @throws {HttpError} If the body parsing fails or is invalid.
+   * @throws {AwsLambdaAdapterError} If the body parsing fails or is invalid.
    */
   private getBody (message: IncomingMessage, rawEvent: AwsLambdaHttpEvent): unknown {
     if (!typeIs.hasBody(message)) {
@@ -88,7 +88,7 @@ export class BodyEventMiddleware {
     const encoding = getCharset(message, defaultCharset)
     const type = getType(message, defaultType)
 
-    if (!typeIs.is(type, ['urlencoded', 'json', 'text', 'bin'])) {
+    if (typeIs.is(type, ['urlencoded', 'json', 'text', 'bin']) === false) {
       return {}
     }
 
@@ -98,7 +98,7 @@ export class BodyEventMiddleware {
           ? JSON.stringify(rawEvent.body)
           : ''
         )
-    
+
     if (Buffer.byteLength(stringifiedBody, encoding as BufferEncoding) > limit) {
       throw new AwsLambdaAdapterError('The context is missing required components.')
     }
