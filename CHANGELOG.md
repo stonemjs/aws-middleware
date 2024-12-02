@@ -1,10 +1,7 @@
-# Change Log
+# Changelog
 
-All notable changes to the "Stone.js AWS Lambda adapter" extension will be documented in this file.
+All notable changes to the "Stone.js AWS Lambda Adapter" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 1.0.0 - 1th October, 2024
-
-### Initial version
-
+## Unreleased

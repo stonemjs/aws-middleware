@@ -1,18 +1,13 @@
-import copy from 'rollup-plugin-copy'
-import babel from '@rollup/plugin-babel'
+import del from 'rollup-plugin-delete'
+import { dts } from 'rollup-plugin-dts'
 import multi from '@rollup/plugin-multi-entry'
 import commonjs from '@rollup/plugin-commonjs'
+import typescript from '@rollup/plugin-typescript'
 import nodeResolve from '@rollup/plugin-node-resolve'
 import nodeExternals from 'rollup-plugin-node-externals'
 
 const inputs = {
-  config: 'src/config/*.mjs',
-  decorators: 'src/decorators/*.mjs',
-  index: [
-    'src/AWSLambdaAdapter.mjs',
-    'src/middleware/**/*.mjs',
-    'src/constants.mjs'
-  ],
+  index: 'src/**/*.ts'
 }
 
 export default Object.entries(inputs).map(([name, input]) => ({
@@ -22,19 +17,32 @@ export default Object.entries(inputs).map(([name, input]) => ({
   ],
   plugins: [
     multi(),
-    nodeExternals({
-      include: ['@stonejs-community/aws-lambda-adapter']
-    }), // Must always be before `nodeResolve()`.
+    nodeExternals(), // Must always be before `nodeResolve()`.
     nodeResolve({
+      extensions: ['.js', '.mjs', '.ts'],
       exportConditions: ['node', 'import', 'require', 'default']
     }),
-    babel({ babelHelpers: 'bundled' }),
-    commonjs(),
-    copy({
-      targets: [
-        { src: 'src/config/options.mjs', dest: 'dist' },
-        { src: 'src/config/options.http.mjs', dest: 'dist' }
-      ]
-    })
+    typescript({
+      noEmitOnError: true,
+      tsconfig: './tsconfig.build.json',
+    }),
+    commonjs()
   ]
-}))
+})).concat([
+  {
+    input: 'dist/**/*.d.ts',
+    output: [{ format: 'es' , file: 'dist/index.d.ts' }],
+    plugins: [
+      multi(),
+      nodeExternals(), // Must always be before `nodeResolve()`.
+      dts(),
+      del({
+        targets: [
+          'dist/**/*.d.ts',
+          '!dist/index.d.ts'
+        ],
+        hook: 'buildEnd'
+      })
+    ],
+  },
+])
