@@ -1,4 +1,4 @@
-# Stone.js: Node Adapter
+# Stone.js: AWS Lambda Adapters
 
 [![npm](https://img.shields.io/npm/l/@stone-js/aws-lambda-adapter)](https://opensource.org/licenses/Apache-2.0)
 [![npm](https://img.shields.io/npm/v/@stone-js/aws-lambda-adapter)](https://www.npmjs.com/package/@stone-js/aws-lambda-adapter)
@@ -8,7 +8,7 @@
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=stonemjs/aws-lambda-adapter)](https://dependabot.com)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
-Stone.js AWS Lambda Adapter with typings.
+Stone.js AWS Lambda Adapters with typings.
 
 ---
 

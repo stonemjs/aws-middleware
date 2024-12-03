@@ -1,24 +1,29 @@
 {
-  "name": "@stonejs-community/aws-lambda-adapter",
+  "name": "@stone-js/aws-lambda-adapter",
   "version": "0.0.0",
-  "description": "Stone.js AWS Adapters",
+  "description": "Stone.js AWS Lambda Adapters",
   "author": "Mr. Stone <evensstone@gmail.com>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/stonejs-community/aws-lambda-adapter.git"
+    "url": "git+ssh://git@github.com/stone-js/aws-lambda-adapter.git"
   },
-  "homepage": "https://github.com/stonejs-community/aws-lambda-adapter#readme",
+  "homepage": "https://github.com/stone-js/aws-lambda-adapter#readme",
   "bugs": {
-    "url": "https://github.com/stonejs-community/aws-lambda-adapter/issues"
+    "url": "https://github.com/stone-js/aws-lambda-adapter/issues"
   },
   "keywords": [
     "aws",
     "faas",
     "node",
     "http",
+    "bridge",
     "lambda",
+    "driver",
+    "runner",
+    "adapter",
     "Stone.js",
+    "connector",
     "middleware",
     "serverless"
   ],
