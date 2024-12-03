@@ -1,6 +1,7 @@
 import { AWS_LAMBDA_PLATFORM } from '../constants'
-import { awsLambdaAdapterResolver, awsLambdaErrorHandlerResolver, awsLambdaKernelResolver } from '../resolvers'
-import { AdapterConfig, AdapterHandlerMiddleware, KernelHandlerMiddleware, StoneBlueprint } from '@stone-js/core'
+import { awsLambdaAdapterResolver } from '../resolvers'
+import { AdapterConfig, AdapterHandlerMiddleware, StoneBlueprint } from '@stone-js/core'
+import { SetAwsLambdaAdapterConfigMiddleware } from '../middleware/configurationMiddleware'
 
 /**
  * Configuration interface for the AWS Lambda Adapter.
@@ -31,9 +32,14 @@ export interface AwsLambaAdapterBlueprint extends StoneBlueprint {}
  */
 export const awsLambaAdapterBlueprint: AwsLambaAdapterBlueprint = {
   stone: {
+    builder: {
+      middleware: [
+        { priority: 10, pipe: SetAwsLambdaAdapterConfigMiddleware }
+      ]
+    },
     adapters: [
       {
-        alias: AWS_LAMBDA_PLATFORM,
+        platform: AWS_LAMBDA_PLATFORM,
         resolver: awsLambdaAdapterResolver,
         middleware: [
           { priority: 100, pipe: AdapterHandlerMiddleware }
@@ -43,18 +49,6 @@ export const awsLambaAdapterBlueprint: AwsLambaAdapterBlueprint = {
         default: false,
         preferred: false
       }
-    ],
-    kernel: {
-      resolver: awsLambdaKernelResolver,
-      middleware: [
-        { priority: 100, pipe: KernelHandlerMiddleware }
-      ]
-    },
-    errorHandler: {
-      levels: {} as any,
-      dontReport: new Set([]),
-      withoutDuplicates: true,
-      resolver: awsLambdaErrorHandlerResolver
-    }
+    ]
   }
 }

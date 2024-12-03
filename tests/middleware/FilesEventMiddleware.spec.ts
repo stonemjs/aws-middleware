@@ -1,7 +1,7 @@
 import { Mock } from 'vitest'
-import { NodeHttpAdapterContext } from '../../src/declarations'
+import { AwsLambdaHttpAdapterContext } from '../../src/declarations'
 import { isMultipart, getFilesUploads } from '@stone-js/http-core'
-import { NodeHttpAdapterError } from '../../src/errors/NodeHttpAdapterError'
+import { AwsLambdaAdapterError } from '../../src/errors/AwsLambdaAdapterError'
 import { FilesEventMiddleware } from '../../src/middleware/FilesEventMiddleware'
 
 vi.mock('@stone-js/http-core')
@@ -10,7 +10,7 @@ describe('FilesEventMiddleware', () => {
   let next: Mock
   let mockBlueprint: any
   let middleware: FilesEventMiddleware
-  let mockContext: NodeHttpAdapterContext
+  let mockContext: AwsLambdaHttpAdapterContext
 
   beforeEach(() => {
     mockBlueprint = {
@@ -26,7 +26,7 @@ describe('FilesEventMiddleware', () => {
       incomingEventBuilder: {
         add: vi.fn().mockReturnThis()
       }
-    } as unknown as NodeHttpAdapterContext
+    } as unknown as AwsLambdaHttpAdapterContext
 
     next = vi.fn()
   })
@@ -35,24 +35,28 @@ describe('FilesEventMiddleware', () => {
     // @ts-expect-error
     mockContext.rawEvent = undefined
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
 
     // @ts-expect-error
     mockContext.rawEvent = {}
     // @ts-expect-error
     mockContext.incomingEventBuilder = null
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
   })
 
   it('should skip file upload handling if the request is not multipart', async () => {
     vi.mocked(isMultipart).mockReturnValue(false)
 
+    // @ts-expect-error
+    mockContext.rawEvent.headers = { 'Content-Type': 'multipart/form-data' }
+
     await middleware.handle(mockContext, next)
 
-    expect(isMultipart).toHaveBeenCalledWith(mockContext.rawEvent)
-    expect(mockBlueprint.get).not.toHaveBeenCalled()
     expect(next).toHaveBeenCalledWith(mockContext)
+    expect(mockBlueprint.get).not.toHaveBeenCalled()
+    // @ts-expect-error - Accessing private method for testing
+    expect(isMultipart).toHaveBeenCalledWith(middleware.normalizeEvent(mockContext.rawEvent))
   })
 
   it('should process multipart request and add files and fields to the event builder', async () => {

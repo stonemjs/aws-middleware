@@ -7,8 +7,6 @@ import { IRawResponseWrapper, RawResponseOptions } from '@stone-js/core'
  * The `RawResponseWrapper` is responsible for encapsulating a raw response
  * and returning it in a structure that aligns with the Stone.js framework's requirements.
  * It implements the `IRawResponseWrapper` interface, ensuring compatibility with the framework.
- *
- * @implements IRawResponseWrapper
  */
 export class RawResponseWrapper implements IRawResponseWrapper<RawResponse> {
   /**

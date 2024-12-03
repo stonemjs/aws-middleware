@@ -1,27 +1,26 @@
 import typeIs from 'type-is'
 import { Mock } from 'vitest'
-import rawBody from 'raw-body'
-import bodyParser from 'co-body'
-import { NodeHttpAdapterContext } from '../../src/declarations'
-import { isMultipart, getCharset, getHttpError } from '@stone-js/http-core'
-import { NodeHttpAdapterError } from '../../src/errors/NodeHttpAdapterError'
+import { isMultipart, getCharset } from '@stone-js/http-core'
+import { AwsLambdaHttpAdapterContext } from '../../src/declarations'
 import { BodyEventMiddleware } from '../../src/middleware/BodyEventMiddleware'
+import { AwsLambdaAdapterError } from '../../src/errors/AwsLambdaAdapterError'
 
 vi.mock('type-is')
 vi.mock('raw-body')
 vi.mock('co-body')
 
 vi.mock('@stone-js/http-core', () => ({
-  isMultipart: vi.fn(),
+  getType: vi.fn(),
   getCharset: vi.fn(),
+  isMultipart: vi.fn(),
   getHttpError: vi.fn()
 }))
 
 describe('BodyEventMiddleware', () => {
-  let middleware: BodyEventMiddleware
-  let mockBlueprint: any
-  let mockContext: NodeHttpAdapterContext
   let next: Mock
+  let mockBlueprint: any
+  let middleware: BodyEventMiddleware
+  let mockContext: AwsLambdaHttpAdapterContext
 
   beforeEach(() => {
     mockBlueprint = {
@@ -41,7 +40,7 @@ describe('BodyEventMiddleware', () => {
       incomingEventBuilder: {
         add: vi.fn()
       }
-    } as unknown as NodeHttpAdapterContext
+    } as unknown as AwsLambdaHttpAdapterContext
 
     next = vi.fn()
   })
@@ -50,14 +49,14 @@ describe('BodyEventMiddleware', () => {
     // @ts-expect-error
     mockContext.rawEvent = undefined
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
 
     // @ts-expect-error
     mockContext.rawEvent = {}
     // @ts-expect-error
     mockContext.incomingEventBuilder = null
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
   })
 
   it('should skip body parsing if the request is multipart', async () => {
@@ -83,7 +82,7 @@ describe('BodyEventMiddleware', () => {
   it('should parse and add empty object body to the event builder on invalid type', async () => {
     vi.mocked(isMultipart).mockReturnValue(false)
     vi.mocked(typeIs.hasBody).mockReturnValue(true)
-    vi.mocked(typeIs).mockReturnValue('html')
+    vi.mocked(typeIs.is).mockReturnValue(false)
 
     await middleware.handle(mockContext, next)
 
@@ -95,13 +94,13 @@ describe('BodyEventMiddleware', () => {
     vi.mocked(isMultipart).mockReturnValue(false)
     vi.mocked(typeIs.hasBody).mockReturnValue(true)
     vi.mocked(getCharset).mockReturnValue('utf-8')
-    vi.mocked(typeIs).mockReturnValue(null)
-    vi.mocked(bodyParser.json).mockResolvedValue({ key: 'value' })
+    vi.mocked(typeIs.is).mockReturnValue('json')
+    // @ts-expect-error
+    mockContext.rawEvent.body = { key: 'value' }
 
     await middleware.handle(mockContext, next)
 
     expect(mockBlueprint.get).toHaveBeenCalledWith('stone.http.body', expect.any(Object))
-    expect(bodyParser.json).toHaveBeenCalledWith(mockContext.rawEvent, { limit: 102400, encoding: 'utf-8' })
     expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('body', { key: 'value' })
     expect(next).toHaveBeenCalledWith(mockContext)
   })
@@ -110,56 +109,28 @@ describe('BodyEventMiddleware', () => {
     vi.mocked(isMultipart).mockReturnValue(false)
     vi.mocked(typeIs.hasBody).mockReturnValue(true)
     vi.mocked(getCharset).mockReturnValue('utf-8')
-    vi.mocked(typeIs).mockReturnValue('text')
-    vi.mocked(bodyParser.text).mockResolvedValue('Hello, world!')
+    vi.mocked(typeIs.is).mockReturnValue('text')
+    // @ts-expect-error
+    mockContext.rawEvent.body = '<h1>Hello, world!</h1>'
 
     await middleware.handle(mockContext, next)
 
-    expect(bodyParser.text).toHaveBeenCalledWith(mockContext.rawEvent, { limit: 102400, encoding: 'utf-8' })
-    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('body', 'Hello, world!')
+    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('body', '<h1>Hello, world!</h1>')
     expect(next).toHaveBeenCalledWith(mockContext)
   })
 
-  it('should parse and add URL-encoded form body to the event builder', async () => {
+  it('should throw an error when body length exeeced the limit', async () => {
     vi.mocked(isMultipart).mockReturnValue(false)
     vi.mocked(typeIs.hasBody).mockReturnValue(true)
-    vi.mocked(getCharset).mockReturnValue('utf-8')
-    vi.mocked(typeIs).mockReturnValue('urlencoded')
-    vi.mocked(bodyParser.form).mockResolvedValue({ name: 'test' })
-
-    await middleware.handle(mockContext, next)
-
-    expect(bodyParser.form).toHaveBeenCalledWith(mockContext.rawEvent, { limit: 102400, encoding: 'utf-8' })
-    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('body', { name: 'test' })
-    expect(next).toHaveBeenCalledWith(mockContext)
-  })
-
-  it('should parse binary body', async () => {
-    vi.mocked(isMultipart).mockReturnValue(false)
-    vi.mocked(typeIs.hasBody).mockReturnValue(true)
-    vi.mocked(getCharset).mockReturnValue('utf-8')
-    vi.mocked(typeIs).mockReturnValue('bin')
-    vi.mocked(rawBody).mockResolvedValue(Buffer.from('binary data'))
-
-    await middleware.handle(mockContext, next)
-
-    expect(rawBody).toHaveBeenCalledWith(mockContext.rawEvent, { length: '123', limit: 102400 })
-    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('body', Buffer.from('binary data'))
-    expect(next).toHaveBeenCalledWith(mockContext)
-  })
-
-  it('should handle body parsing errors and throw NodeHttpAdapterError', async () => {
-    const mockError = new Error('Invalid JSON')
-    vi.mocked(isMultipart).mockReturnValue(false)
-    vi.mocked(typeIs.hasBody).mockReturnValue(true)
-    vi.mocked(getCharset).mockReturnValue('utf-8')
-    vi.mocked(typeIs).mockReturnValue('json')
-    vi.mocked(bodyParser.json).mockRejectedValue(mockError)
-    vi.mocked(getHttpError).mockReturnValue({ message: 'Invalid body', statusCode: 400 } as any)
-
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    vi.mocked(typeIs.is).mockReturnValue('sting')
+    Buffer.byteLength = vi.fn().mockReturnValue(999999999)
 
     // @ts-expect-error
-    expect(getHttpError).toHaveBeenCalledWith(400, 'Invalid body.', mockError.message, mockError.code, mockError)
+    mockContext.rawEvent.headers = { 'Content-Type': 'multipart/form-data', 'Content-Length': '999999999' }
+
+    await expect(async () => await middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
+    expect(next).not.toHaveBeenCalledWith(mockContext)
+    // @ts-expect-error
+    Buffer.byteLength.mockRestore()
   })
 })

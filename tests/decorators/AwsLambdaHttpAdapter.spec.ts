@@ -11,7 +11,7 @@ vi.mock('@stone-js/core')
 describe('AwsLambdaHttpAdapter', () => {
   it('should call setClassMetadata with correct parameters', () => {
     (addBlueprint as Mock).mockReturnValueOnce(() => {})
-    const options: AwsLambdaHttpAdapterOptions = awsLambaHttpAdapterBlueprint.stone.adapters[0]
+    const options: AwsLambdaHttpAdapterOptions = awsLambaHttpAdapterBlueprint.stone.adapters?.[0] ?? {}
     AwsLambdaHttpAdapter(options)(class {}, {} as any)
     expect(addBlueprint).toHaveBeenCalled()
   })

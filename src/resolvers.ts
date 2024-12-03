@@ -1,25 +1,20 @@
 import mime from 'mime/lite'
 import accepts from 'accepts'
-import { Container } from '@stone-js/service-container'
+import { AWSLambdaAdapter } from './AWSLambdaAdapter'
+import { AWSLambdaHttpAdapter } from './AWSLambdaHttpAdapter'
+import { HTTP_INTERNAL_SERVER_ERROR } from '@stone-js/http-core'
 import { AwsLambdaAdapterError } from './errors/AwsLambdaAdapterError'
-import { HTTP_INTERNAL_SERVER_ERROR, IncomingHttpEvent, OutgoingHttpResponse } from '@stone-js/http-core'
 import { RawHttpResponseOptions, AwsLambdaHttpAdapterContext, RawHttpResponse, RawResponse } from './declarations'
 import {
   AdapterHooks,
   AdapterResolver,
+  defaultKernelResolver,
   defaultLoggerResolver,
   ErrorHandler,
   ErrorHandlerResolver,
-  EventEmitter,
   IBlueprint,
-  IncomingEvent,
-  Kernel,
-  KernelResolver,
-  LoggerResolver,
-  OutgoingResponse
+  LoggerResolver
 } from '@stone-js/core'
-import { AWSLambdaHttpAdapter } from './AWSLambdaHttpAdapter'
-import { AWSLambdaAdapter } from './AWSLambdaAdapter'
 
 /**
  * Resolves and renders an HTTP response for errors in the AWS Lambda HTTP adapter.
@@ -36,11 +31,7 @@ const awsLambdaHttpErrorHandlerRenderResponseResolver = (error: AwsLambdaAdapter
   const rawResponse = context?.rawResponse
 
   if (context?.rawEvent === undefined || rawResponse === undefined) {
-    return {
-      statusCode: HTTP_INTERNAL_SERVER_ERROR,
-      statusMessage: 'Internal Server Error',
-      body: 'Internal Server Error'
-    }
+    throw new AwsLambdaAdapterError('Invalid error context provided for rendering response.')
   }
 
   const httpError = error.cause as RawHttpResponseOptions | undefined
@@ -79,24 +70,6 @@ const loggerResolver = (blueprint: IBlueprint): LoggerResolver => {
 }
 
 /**
- * Error handler resolver for AWS Lambda HTTP adapter.
- *
- * Creates and configures an `ErrorHandler` for managing errors in the AWS Lambda HTTP adapter.
- *
- * @param blueprint - The `IBlueprint` providing configuration and dependencies.
- * @returns An `ErrorHandler` instance for handling AWS Lambda HTTP errors.
- */
-export const awsLambdaHttpErrorHandlerResolver: ErrorHandlerResolver<RawHttpResponse> = (
-  blueprint: IBlueprint
-): ErrorHandler<RawHttpResponse> => {
-  return ErrorHandler.create<RawHttpResponse>({
-    blueprint,
-    logger: loggerResolver(blueprint)(blueprint),
-    renderResponseResolver: awsLambdaHttpErrorHandlerRenderResponseResolver
-  })
-}
-
-/**
  * Error handler resolver for generic AWS Lambda adapter.
  *
  * Creates and configures an `ErrorHandler` for managing errors in the generic AWS Lambda adapter.
@@ -115,62 +88,20 @@ export const awsLambdaErrorHandlerResolver: ErrorHandlerResolver<RawResponse> = 
 }
 
 /**
- * Kernel resolver for AWS Lambda HTTP adapter.
+ * Error handler resolver for AWS Lambda HTTP adapter.
  *
- * Creates and configures a `Kernel` for processing HTTP events in the AWS Lambda HTTP adapter.
+ * Creates and configures an `ErrorHandler` for managing errors in the AWS Lambda HTTP adapter.
  *
  * @param blueprint - The `IBlueprint` providing configuration and dependencies.
- * @returns A `Kernel` instance for handling incoming HTTP events.
+ * @returns An `ErrorHandler` instance for handling AWS Lambda HTTP errors.
  */
-export const awsLambdaHttpKernelResolver: KernelResolver<IncomingHttpEvent, OutgoingHttpResponse> = (
+export const awsLambdaHttpErrorHandlerResolver: ErrorHandlerResolver<RawHttpResponse> = (
   blueprint: IBlueprint
-): Kernel<IncomingHttpEvent, OutgoingHttpResponse> => {
-  return Kernel.create({
+): ErrorHandler<RawHttpResponse> => {
+  return ErrorHandler.create<RawHttpResponse>({
     blueprint,
-    container: Container.create(),
-    eventEmitter: new EventEmitter(),
-    logger: loggerResolver(blueprint)(blueprint)
-  })
-}
-
-/**
- * Kernel resolver for generic AWS Lambda adapter.
- *
- * Creates and configures a `Kernel` for processing generic events in the AWS Lambda adapter.
- *
- * @param blueprint - The `IBlueprint` providing configuration and dependencies.
- * @returns A `Kernel` instance for handling incoming events.
- */
-export const awsLambdaKernelResolver: KernelResolver<IncomingEvent, OutgoingResponse> = (
-  blueprint: IBlueprint
-): Kernel<IncomingEvent, OutgoingResponse> => {
-  return Kernel.create({
-    blueprint,
-    container: Container.create(),
-    eventEmitter: new EventEmitter(),
-    logger: loggerResolver(blueprint)(blueprint)
-  })
-}
-
-/**
- * Adapter resolver for AWS Lambda HTTP adapter.
- *
- * Creates and configures an `AWSLambdaHttpAdapter` for handling HTTP events in AWS Lambda.
- *
- * @param blueprint - The `IBlueprint` providing configuration and dependencies.
- * @returns An `AWSLambdaHttpAdapter` instance.
- */
-export const awsLambdaHttpAdapterResolver: AdapterResolver = (blueprint: IBlueprint) => {
-  const hooks = blueprint.get<AdapterHooks>('stone.adapter.hooks', {})
-  const handlerResolver = blueprint.get('stone.kernel.resolver', awsLambdaHttpKernelResolver)
-  const errorHandlerResolver = blueprint.get('stone.errorHandler.resolver', awsLambdaHttpErrorHandlerResolver)
-
-  return AWSLambdaHttpAdapter.create({
-    hooks,
-    blueprint,
-    handlerResolver,
     logger: loggerResolver(blueprint)(blueprint),
-    errorHandler: errorHandlerResolver(blueprint)
+    renderResponseResolver: awsLambdaHttpErrorHandlerRenderResponseResolver
   })
 }
 
@@ -184,10 +115,32 @@ export const awsLambdaHttpAdapterResolver: AdapterResolver = (blueprint: IBluepr
  */
 export const awsLambdaAdapterResolver: AdapterResolver = (blueprint: IBlueprint) => {
   const hooks = blueprint.get<AdapterHooks>('stone.adapter.hooks', {})
-  const handlerResolver = blueprint.get('stone.kernel.resolver', awsLambdaKernelResolver)
+  const handlerResolver = blueprint.get('stone.kernel.resolver', defaultKernelResolver)
   const errorHandlerResolver = blueprint.get('stone.errorHandler.resolver', awsLambdaErrorHandlerResolver)
 
   return AWSLambdaAdapter.create({
+    hooks,
+    blueprint,
+    handlerResolver,
+    logger: loggerResolver(blueprint)(blueprint),
+    errorHandler: errorHandlerResolver(blueprint)
+  })
+}
+
+/**
+ * Adapter resolver for AWS Lambda HTTP adapter.
+ *
+ * Creates and configures an `AWSLambdaHttpAdapter` for handling HTTP events in AWS Lambda.
+ *
+ * @param blueprint - The `IBlueprint` providing configuration and dependencies.
+ * @returns An `AWSLambdaHttpAdapter` instance.
+ */
+export const awsLambdaHttpAdapterResolver: AdapterResolver = (blueprint: IBlueprint) => {
+  const hooks = blueprint.get<AdapterHooks>('stone.adapter.hooks', {})
+  const handlerResolver = blueprint.get('stone.kernel.resolver', defaultKernelResolver)
+  const errorHandlerResolver = blueprint.get('stone.errorHandler.resolver', awsLambdaHttpErrorHandlerResolver)
+
+  return AWSLambdaHttpAdapter.create({
     hooks,
     blueprint,
     handlerResolver,

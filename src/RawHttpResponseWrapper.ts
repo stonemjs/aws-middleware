@@ -8,8 +8,6 @@ import { RawHttpResponse, RawHttpResponseOptions } from './declarations'
  * a raw HTTP response that conforms to the expected structure for AWS Lambda.
  * It implements the `IRawResponseWrapper` interface, ensuring compatibility
  * with the Stone.js framework.
- *
- * @implements IRawResponseWrapper
  */
 export class RawHttpResponseWrapper implements IRawResponseWrapper<RawHttpResponse> {
   /**

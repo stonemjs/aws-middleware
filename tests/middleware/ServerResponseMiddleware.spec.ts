@@ -1,8 +1,8 @@
 import { Mock } from 'vitest'
 import statuses from 'statuses'
 import { BinaryFileResponse } from '@stone-js/http-core'
-import { NodeHttpAdapterContext } from '../../src/declarations'
-import { NodeHttpAdapterError } from '../../src/errors/NodeHttpAdapterError'
+import { AwsLambdaHttpAdapterContext } from '../../src/declarations'
+import { AwsLambdaAdapterError } from '../../src/errors/AwsLambdaAdapterError'
 import { ServerResponseMiddleware } from '../../src/middleware/ServerResponseMiddleware'
 
 /* eslint-disable @typescript-eslint/no-extraneous-class */
@@ -18,7 +18,7 @@ describe('ServerResponseMiddleware', () => {
   let next: Mock
   let mockBlueprint: any
   let middleware: ServerResponseMiddleware
-  let mockContext: NodeHttpAdapterContext
+  let mockContext: AwsLambdaHttpAdapterContext
 
   beforeEach(() => {
     mockBlueprint = {
@@ -43,7 +43,7 @@ describe('ServerResponseMiddleware', () => {
         content: '{"success": true}',
         charset: 'utf-8'
       }
-    } as unknown as NodeHttpAdapterContext
+    } as unknown as AwsLambdaHttpAdapterContext
 
     next = vi.fn()
     vi.mocked(statuses).mockReturnValue({ message: { 500: 'Internal Server Error' } } as any)
@@ -53,14 +53,14 @@ describe('ServerResponseMiddleware', () => {
     // @ts-expect-error
     mockContext.rawEvent = undefined
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
 
     // @ts-expect-error
     mockContext.rawEvent = {}
     // @ts-expect-error
     mockContext.rawResponseBuilder = null
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
   })
 
   it('should add headers, status code, and status message to the response builder', async () => {
@@ -95,7 +95,7 @@ describe('ServerResponseMiddleware', () => {
   })
 
   it('should stream file if the response is a BinaryFileResponse', async () => {
-    const mockFile = {}
+    const mockFile = { getContent: () => 'file content' }
     // @ts-expect-error
     mockContext.outgoingResponse = new BinaryFileResponse()
     // @ts-expect-error
@@ -107,10 +107,7 @@ describe('ServerResponseMiddleware', () => {
 
     await middleware.handle(mockContext, next)
 
-    expect(mockContext.rawResponseBuilder?.add).toHaveBeenCalledWith(
-      'streamFile',
-      expect.any(Function)
-    )
+    expect(mockContext.rawResponseBuilder?.add).toHaveBeenCalledWith('body', 'file content')
   })
 
   it('should not add body or stream file if the method is HEAD', async () => {

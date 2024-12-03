@@ -1,9 +1,10 @@
 import { AWS_LAMBDA_HTTP_PLATFORM } from '../constants'
+import { awsLambdaHttpAdapterResolver } from '../resolvers'
 import { IncomingHttpEvent, OutgoingHttpResponse } from '@stone-js/http-core'
 import { IncomingEventMiddleware } from '../middleware/IncomingEventMiddleware'
 import { ServerResponseMiddleware } from '../middleware/ServerResponseMiddleware'
-import { AdapterConfig, AdapterHandlerMiddleware, KernelHandlerMiddleware, StoneBlueprint } from '@stone-js/core'
-import { awsLambdaHttpAdapterResolver, awsLambdaHttpErrorHandlerResolver, awsLambdaHttpKernelResolver } from '../resolvers'
+import { AdapterConfig, AdapterHandlerMiddleware, StoneBlueprint } from '@stone-js/core'
+import { SetAwsLambdaHttpAdapterConfigMiddleware } from '../middleware/configurationMiddleware'
 
 /**
  * Configuration interface for the AWS Lambda Http Adapter.
@@ -34,9 +35,14 @@ export interface AwsLambaHttpAdapterBlueprint extends StoneBlueprint<IncomingHtt
  */
 export const awsLambaHttpAdapterBlueprint: AwsLambaHttpAdapterBlueprint = {
   stone: {
+    builder: {
+      middleware: [
+        { priority: 10, pipe: SetAwsLambdaHttpAdapterConfigMiddleware }
+      ]
+    },
     adapters: [
       {
-        alias: AWS_LAMBDA_HTTP_PLATFORM,
+        platform: AWS_LAMBDA_HTTP_PLATFORM,
         resolver: awsLambdaHttpAdapterResolver,
         middleware: [
           { priority: 0, pipe: IncomingEventMiddleware },
@@ -48,18 +54,6 @@ export const awsLambaHttpAdapterBlueprint: AwsLambaHttpAdapterBlueprint = {
         default: false,
         preferred: false
       }
-    ],
-    kernel: {
-      resolver: awsLambdaHttpKernelResolver,
-      middleware: [
-        { priority: 100, pipe: KernelHandlerMiddleware }
-      ]
-    },
-    errorHandler: {
-      levels: {} as any,
-      dontReport: new Set([]),
-      withoutDuplicates: true,
-      resolver: awsLambdaHttpErrorHandlerResolver
-    }
+    ]
   }
 }

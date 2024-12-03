@@ -1,9 +1,8 @@
 import proxyAddr from 'proxy-addr'
 import { NextPipe } from '@stone-js/pipeline'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NodeHttpAdapterContext } from '../../src/declarations'
-import { ServerResponseWrapper } from '../../src/ServerResponseWrapper'
-import { NodeHttpAdapterError } from '../../src/errors/NodeHttpAdapterError'
+import { AwsLambdaHttpAdapterContext } from '../../src/declarations'
+import { RawHttpResponseWrapper } from '../../src/RawHttpResponseWrapper'
+import { AwsLambdaAdapterError } from '../../src/errors/AwsLambdaAdapterError'
 import { IncomingEventMiddleware } from '../../src/middleware/IncomingEventMiddleware'
 import {
   getProtocol,
@@ -26,8 +25,8 @@ vi.mock('@stone-js/http-core', () => ({
 describe('IncomingEventMiddleware', () => {
   let mockBlueprint: any
   let middleware: IncomingEventMiddleware
-  let mockContext: NodeHttpAdapterContext
-  let next: NextPipe<NodeHttpAdapterContext, ServerResponseWrapper>
+  let mockContext: AwsLambdaHttpAdapterContext
+  let next: NextPipe<AwsLambdaHttpAdapterContext, RawHttpResponseWrapper>
 
   beforeEach(() => {
     mockBlueprint = {
@@ -38,18 +37,24 @@ describe('IncomingEventMiddleware', () => {
 
     mockContext = {
       rawEvent: {
-        method: 'GET',
-        url: '/test',
+        httpMethod: 'GET',
+        path: '/test',
         headers: { cookie: 'testCookie' },
-        socket: {
-          remoteAddress: '127.0.0.1'
+        requestContext: {
+          identity: {
+            sourceIp: '127.0.0.1'
+          },
+          http: {
+            method: 'GET',
+            sourceIp: '127.0.0.1'
+          }
         }
       },
       rawResponse: {},
       incomingEventBuilder: {
         add: vi.fn().mockReturnThis()
       }
-    } as unknown as NodeHttpAdapterContext
+    } as unknown as AwsLambdaHttpAdapterContext
 
     next = vi.fn()
 
@@ -61,14 +66,14 @@ describe('IncomingEventMiddleware', () => {
     // @ts-expect-error
     mockContext.rawEvent = null
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
 
     // @ts-expect-error
     mockContext.rawEvent = { foo: 'bar' } as any
     // @ts-expect-error
     mockContext.incomingEventBuilder = null
 
-    await expect(middleware.handle(mockContext, next)).rejects.toThrow(NodeHttpAdapterError)
+    await expect(middleware.handle(mockContext, next)).rejects.toThrow(AwsLambdaAdapterError)
   })
 
   it('should call next with the modified context', async () => {
@@ -87,15 +92,48 @@ describe('IncomingEventMiddleware', () => {
     expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('url', expect.any(URL))
     expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('cookies', { testCookie: 'value' })
     expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('headers', mockContext.rawEvent?.headers)
+
+    // Handle htt method from requestContext.httpMethod
+    // @ts-expect-error
+    mockContext.rawEvent.httpMethod = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.httpMethod = 'GET'
+    await middleware.handle(mockContext, next)
+
+    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('method', 'GET')
+
+    // Handle http method from requestContext.http.method
+    // @ts-expect-error
+    mockContext.rawEvent.httpMethod = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.httpMethod = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.http.method = 'GET'
+    await middleware.handle(mockContext, next)
+
+    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('method', 'GET')
+
+    // Return default http method
+    // @ts-expect-error
+    mockContext.rawEvent.httpMethod = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.httpMethod = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.http.method = undefined
+    await middleware.handle(mockContext, next)
+
+    expect(mockContext.incomingEventBuilder?.add).toHaveBeenCalledWith('method', 'GET')
   })
 
   it('should extract URL correctly', () => {
     vi.mocked(getProtocol).mockImplementation((a, b, c, d) => 'http')
     vi.mocked(getHostname).mockImplementation((a, b, c) => 'localhost')
     // @ts-expect-error
-    mockContext.rawEvent.url = undefined
+    mockContext.rawEvent.path = undefined
     // @ts-expect-error
-    mockContext.rawEvent.socket.remoteAddress = undefined
+    mockContext.rawEvent.requestContext.identity.sourceIp = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.http.sourceIp = undefined
     // @ts-expect-error
     const url = middleware.extractUrl(mockContext.rawEvent, {
       trusted: [],
@@ -110,7 +148,9 @@ describe('IncomingEventMiddleware', () => {
   it('should extract protocol correctly', () => {
     vi.mocked(getProtocol).mockImplementation((a, b, c, d) => 'http')
     // @ts-expect-error
-    mockContext.rawEvent.socket.remoteAddress = undefined
+    mockContext.rawEvent.requestContext.identity.sourceIp = undefined
+    // @ts-expect-error
+    mockContext.rawEvent.requestContext.http.sourceIp = undefined
     // @ts-expect-error
     const proto = middleware.getProtocol(mockContext.rawEvent, {
       trusted: [],
